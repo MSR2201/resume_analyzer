@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Screening System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">
+        <h1 class="text-2xl font-bold mb-6">Resume Screening System</h1>
+        
+        <form id="screeningForm" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block mb-2">Job Description:</label>
+                <textarea name="job_description" class="w-full p-2 border rounded" rows="5" required></textarea>
+            </div>
+            
+            <div>
+                <label class="block mb-2">Upload Resume (PDF):</label>
+                <input type="file" name="resume" accept=".pdf" class="w-full" required>
+            </div>
+            
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
+                Analyze
+            </button>
+        </form>
+        
+        <div id="results" class="mt-8 hidden">
+            <h2 class="text-xl font-bold mb-4">Analysis Results</h2>
+            <div id="resultsContent" class="prose"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('screeningForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const resultsDiv = document.getElementById('results');
+            const resultsContent = document.getElementById('resultsContent');
+            
+            submitButton.disabled = true;
+            submitButton.textContent = 'Analyzing...';
+            
+            try {
+                const response = await fetch('/api/analyze/', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+    
+                // Show results div
+                resultsDiv.classList.remove('hidden');
+                
+                // Display raw analysis results
+                if (data.analysis) {
+                    resultsContent.innerHTML = `
+                        <div class="space-y-4">
+                            <pre class="whitespace-pre-wrap">${data.analysis}</pre>
+                        </div>
+                    `;
+                } else {
+                    // Display structured results
+                    resultsContent.innerHTML = `
+                        <div class="space-y-4">
+                            <p class="text-lg">Match Score: <span class="font-bold">${data.analysis.match_score}%</span></p>
+                            <div>
+                                <h4 class="font-medium">Matching Skills:</h4>
+                                <ul class="list-disc pl-5">
+                                    ${data.analysis.matching_skills ? 
+                                        data.analysis.matching_skills.map(skill => `<li>${skill}</li>`).join('') : 
+                                        '<li>No matching skills found</li>'}
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium">Missing Skills:</h4>
+                                <ul class="list-disc pl-5">
+                                    ${data.analysis.missing_skills ? 
+                                        data.analysis.missing_skills.map(skill => `<li>${skill}</li>`).join('') : 
+                                        '<li>No missing skills found</li>'}
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium">Recommendations:</h4>
+                                <ul class="list-disc pl-5">
+                                    ${data.analysis.recommendations ? 
+                                        data.analysis.recommendations.map(rec => `<li>${rec}</li>`).join('') : 
+                                        '<li>No recommendations available</li>'}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultsDiv.classList.remove('hidden');
+                resultsContent.innerHTML = `<div class="text-red-500">Error: ${error.message}</div>`;
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Analyze';
+            }
+        });
+    </script>
+</body>
+</html> 
