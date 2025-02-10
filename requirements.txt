@@ -1,0 +1,7 @@
+django 
+djangorestframework 
+together 
+pypdf2 
+nltk 
+scikit-learn
+langchain-together
