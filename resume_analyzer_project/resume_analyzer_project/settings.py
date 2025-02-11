@@ -24,9 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-eh6sl8ls-lz0xf%v&1vj&=$6=yzi7emv$%3c=l8!qo7g2te9&%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -84,7 +83,7 @@ DATABASES = {
     }
 }
 
-
+ALLOWED_HOSTS = ['your-vercel-app-name.vercel.app']
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
