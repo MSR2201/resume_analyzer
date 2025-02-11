@@ -83,7 +83,7 @@ DATABASES = {
     }
 }
 
-ALLOWED_HOSTS = ['your-vercel-app-name.vercel.app']
+ALLOWED_HOSTS = ['resume-analyzer-rai1.vercel.app']
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
